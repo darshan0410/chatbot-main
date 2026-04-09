@@ -128,33 +128,43 @@ const HistoryPage = () => {
           </div>
         ) : (
           <div className="hist-list">
-            {history.map((h) => (
-              <div key={h.id} className="hist-card">
-                <div className="hist-card-left">
-                  <div className="hist-score-circle">
-                    <span>{h.avgScore}</span>
-                  </div>
-                  <div className="hist-info">
+            {history.map((h) => {
+              const isCompleted = parseFloat(h.avgScore) > 0;
+              const dateStr = new Date(h.date).toLocaleDateString("en-GB", { day: '2-digit', month: '2-digit', year: 'numeric' });
+              return (
+                <div key={h.id} className="nhc-card" onClick={() => setSelectedHistory(h)}>
+                  <div className="nhc-left">
                     <h4>{h.role}</h4>
-                    <p>{h.difficulty} • {h.experience}</p>
-                    <span className="hist-date">
-                      {new Date(h.date).toLocaleDateString("en-US", {
-                        month: "short", day: "numeric", year: "numeric",
-                        hour: "2-digit", minute: "2-digit"
-                      })}
-                    </span>
+                    <p>Looking for {h.role.toLowerCase()} role. • {h.difficulty}</p>
+                    <span className="nhc-date">{dateStr}</span>
+                  </div>
+                  <div className="nhc-right">
+                    <div className="nhc-score-col">
+                      <span className="nhc-score-val" style={{ color: isCompleted ? '#22c55e' : '#475569' }}>{h.avgScore}/10</span>
+                      <span className="nhc-score-label">Overall Score</span>
+                    </div>
+                    <div className="hist-info">
+                      <h4>{h.role}</h4>
+                      <p>{h.difficulty} • {h.experience}</p>
+                      <span className="hist-date">
+                        {new Date(h.date).toLocaleDateString("en-US", {
+                          month: "short", day: "numeric", year: "numeric",
+                          hour: "2-digit", minute: "2-digit"
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="hist-card-actions">
+                    <button className="hist-view-btn" onClick={() => setSelectedHistory(h)} title="View report">
+                      <FaEye size={14} /> View
+                    </button>
+                    <button className="hist-del-btn" onClick={() => deleteSession(h.id)} title="Delete">
+                      <FaTrash size={12} />
+                    </button>
                   </div>
                 </div>
-                <div className="hist-card-actions">
-                  <button className="hist-view-btn" onClick={() => setSelectedHistory(h)} title="View report">
-                    <FaEye size={14} /> View
-                  </button>
-                  <button className="hist-del-btn" onClick={() => deleteSession(h.id)} title="Delete">
-                    <FaTrash size={12} />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

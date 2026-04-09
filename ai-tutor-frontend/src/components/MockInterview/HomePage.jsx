@@ -2,8 +2,18 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaRobot, FaMicrophone, FaRegClock, FaMagic, FaUser, FaBriefcase, FaChartLine, FaFileUpload } from "react-icons/fa";
+import { FaRobot, FaMicrophone, FaRegClock, FaMagic, FaUser, FaBriefcase, FaChartLine, FaFileUpload, FaChartBar, FaFileAlt, FaFilePdf, FaHistory } from "react-icons/fa";
 import "./MockInterview.css";
+
+import imgEval from "../../assets/ai_evaluation.png";
+import imgResume from "../../assets/resume_interview.png";
+import imgPdf from "../../assets/pdf_report.png";
+import imgHistory from "../../assets/history_analytics.png";
+
+import imgHr from "../../assets/hr_mode.png";
+import imgTech from "../../assets/tech_mode.png";
+import imgConf from "../../assets/confidence_mode.png";
+import imgCredits from "../../assets/credits_mode.png";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -110,7 +120,101 @@ const HomePage = () => {
               <p>Real interview pressure with time tracking.</p>
             </div>
           </div>
-          <h3 className="landing-footer-heading">Advanced AI <span style={{ color: "#22c55e" }}>Capabilities</span></h3>
+          <h3 className="landing-footer-heading" style={{ marginTop: "60px", marginBottom: "40px", fontSize: "2rem", textAlign: "center" }}>
+            Advanced AI <span style={{ color: "#22c55e" }}>Capabilities</span>
+          </h3>
+          
+          <div className="adv-capabilities-grid">
+            {/* Card 1 */}
+            <div className="adv-cap-card">
+              <div className="adv-cap-img-wrap">
+                <img src={imgEval} alt="AI Answer Evaluation" className="adv-cap-img" />
+              </div>
+              <div className="adv-cap-content">
+                <div className="adv-cap-icon" style={{ background: "#f0fdf4", color: "#22c55e" }}><FaChartBar size={14} /></div>
+                <h4>AI Answer Evaluation</h4>
+                <p>Scores communication, technical accuracy and confidence.</p>
+              </div>
+            </div>
+
+            {/* Card 2 */}
+            <div className="adv-cap-card">
+              <div className="adv-cap-img-wrap">
+                <img src={imgResume} alt="Resume Based Interview" className="adv-cap-img" />
+              </div>
+              <div className="adv-cap-content">
+                <div className="adv-cap-icon" style={{ background: "#f0fdf4", color: "#22c55e" }}><FaFileAlt size={14} /></div>
+                <h4>Resume Based Interview</h4>
+                <p>Project-specific questions based on uploaded resume.</p>
+              </div>
+            </div>
+
+            {/* Card 3 */}
+            <div className="adv-cap-card">
+              <div className="adv-cap-img-wrap">
+                <img src={imgPdf} alt="Downloadable PDF Report" className="adv-cap-img" />
+              </div>
+              <div className="adv-cap-content">
+                <div className="adv-cap-icon" style={{ background: "#f0fdf4", color: "#22c55e" }}><FaFilePdf size={14} /></div>
+                <h4>Downloadable PDF Report</h4>
+                <p>Detailed strengths, weaknesses and improvement insights.</p>
+              </div>
+            </div>
+
+            {/* Card 4 */}
+            <div className="adv-cap-card">
+              <div className="adv-cap-img-wrap">
+                <img src={imgHistory} alt="History & Analytics" className="adv-cap-img" />
+              </div>
+              <div className="adv-cap-content">
+                <div className="adv-cap-icon" style={{ background: "#f0fdf4", color: "#22c55e" }}><FaHistory size={14} /></div>
+                <h4>History & Analytics</h4>
+                <p>Track progress with performance graphs and topic analysis.</p>
+              </div>
+            </div>
+          </div>
+
+          <h3 className="landing-footer-heading" style={{ marginTop: "80px", marginBottom: "40px", fontSize: "2rem", textAlign: "center" }}>
+            Multiple Interview <span style={{ color: "#22c55e" }}>Modes</span>
+          </h3>
+
+          <div className="modes-grid" style={{ marginBottom: "60px" }}>
+            {/* Mode Card 1 */}
+            <div className="mode-card" onClick={() => { setRole("HR Manager"); setDifficulty("Intermediate"); setShowSetup(true); window.scrollTo({top: 0, behavior: 'smooth'}); }}>
+              <div className="mode-card-content">
+                <h4>HR Interview Mode</h4>
+                <p>Behavioral and communication based evaluation.</p>
+              </div>
+              <img src={imgHr} alt="HR Interview Mode" className="mode-card-img" />
+            </div>
+
+            {/* Mode Card 2 */}
+            <div className="mode-card" onClick={() => { setRole("Frontend Developer"); setDifficulty("Advanced"); setShowSetup(true); window.scrollTo({top: 0, behavior: 'smooth'}); }}>
+              <div className="mode-card-content">
+                <h4>Technical Mode</h4>
+                <p>Deep technical questioning based on selected role.</p>
+              </div>
+              <img src={imgTech} alt="Technical Mode" className="mode-card-img" />
+            </div>
+
+            {/* Mode Card 3 */}
+            <div className="mode-card" onClick={() => { setDifficulty("Beginner"); setShowSetup(true); window.scrollTo({top: 0, behavior: 'smooth'}); }}>
+              <div className="mode-card-content">
+                <h4>Confidence Detection</h4>
+                <p>Basic tone and voice analysis insights.</p>
+              </div>
+              <img src={imgConf} alt="Confidence Detection" className="mode-card-img" />
+            </div>
+
+            {/* Mode Card 4 */}
+            <div className="mode-card" onClick={() => alert("Premium access feature coming soon!")}>
+              <div className="mode-card-content">
+                <h4>Credits System</h4>
+                <p>Unlock premium interview sessions easily.</p>
+              </div>
+              <img src={imgCredits} alt="Credits System" className="mode-card-img" />
+            </div>
+          </div>
         </div>
       )}
 
