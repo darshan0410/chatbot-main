@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import ReactMarkdown from "react-markdown";
+import mermaid from "mermaid";
 import "./AITutor.css";
 
 const AITutor = () => {
@@ -19,8 +21,35 @@ const AITutor = () => {
   ];
 
   useEffect(() => {
+    mermaid.initialize({ startOnLoad: true });
+  }, []);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => mermaid.init(), 200);
   }, [messages]);
+
+  // 🔥 Extract courses for cards
+  const extractCourses = (text) => {
+    const courseRegex =
+    /\d+\.\s(.+?)\n- Price: ₹(.+?)\n- Author: (.+?)\n- Level: (.+?)\n- Description: (.+?)\n- Link: (.+)/g;
+
+    let matches;
+    const courses = [];
+
+    while ((matches = courseRegex.exec(text)) !== null) {
+      courses.push({
+        title: matches[1],
+        price: matches[2],
+        author: matches[3],
+        level: matches[4],
+        description: matches[5],
+        link: matches[6]
+      });
+    }
+
+    return courses;
+  };
 
   const sendMessage = async (text) => {
     const messageToSend = text || input;
@@ -37,7 +66,6 @@ const AITutor = () => {
     setLoading(true);
 
     try {
-      // ✅ ALWAYS CALL BACKEND
       const response = await axios.post(
         "http://localhost:5000/api/chat/message",
         {
@@ -47,9 +75,7 @@ const AITutor = () => {
         }
       );
 
-      // 🔥 Adjust this depending on your backend response structure
       const botResponse =
-        response.data?.reply || // if backend sends { reply: "text" }
         response.data?.data?.assistantMessage?.content ||
         "Sorry, I couldn't process that.";
 
@@ -57,9 +83,8 @@ const AITutor = () => {
         id: crypto.randomUUID(),
         text: botResponse,
         sender: "bot"
-      };
-
-      setMessages((prev) => [...prev, botMessage]);
+    };
+    setMessages((prev) => [...prev, botMessage]);
 
     } catch (err) {
       setMessages((prev) => [
@@ -96,11 +121,20 @@ const AITutor = () => {
           </div>
 
           <div className="chat-body">
+
+            {/* 🔥 WELCOME */}
             {messages.length === 0 && (
               <>
                 <div className="bot-message">
-                  👋 Hi! I’m your LMS AI Tutor.
-                  Ask me about courses, prices, authors, or recommendations.
+                  <strong>👋 AI Tutor</strong>
+                  <br />
+                  I can help you with:
+                  <ul>
+                    <li>📚 Course recommendations</li>
+                    <li>💰 Pricing details</li>
+                    <li>👨‍🏫 Authors info</li>
+                    <li>🚀 Learning roadmaps</li>
+                  </ul>
                 </div>
 
                 <div className="quick-replies">
@@ -113,21 +147,103 @@ const AITutor = () => {
               </>
             )}
 
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={
-                  msg.sender === "user"
-                    ? "user-message"
-                    : "bot-message"
-                }
-              >
-                {/* 🔥 PRESERVE LINE BREAKS */}
-                {msg.text.split("\n").map((line, i) => (
-                  <div key={i}>{line}</div>
-                ))}
-              </div>
-            ))}
+            {/* 🔥 MESSAGES */}
+            {messages.map((msg) => {
+              const courses = extractCourses(msg.text);
+
+              return (
+                <div
+                  key={msg.id}
+                  className={msg.sender === "user" ? "user-message" : "bot-message"}
+                >
+                  {msg.sender === "bot" ? (
+                    courses.length > 0 ? (
+                      <div>
+                        {courses.map((course, i) => (
+                          <div key={i} style={{
+                            border: "1px solid #eee",
+                            borderRadius: "10px",
+                            padding: "10px",
+                            marginBottom: "8px",
+                            background: "#fff"
+                          }}>
+                            <strong>{course.title}</strong>
+                            <div>💰 ₹{course.price}</div>
+                            <div>👨‍🏫 {course.author}</div>
+                            <div>📊 {course.level}</div>
+                            <p style={{ fontSize: "12px" }}>{course.description}</p>
+
+                            <a
+                                href={course._id}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "6px",
+                                marginTop: "8px",
+                                padding: "8px 14px",
+                                background: "linear-gradient(135deg, #6366f1, #9333ea)",
+                                color: "#fff",
+                                borderRadius: "8px",
+                                fontSize: "13px",
+                                fontWeight: "600",
+                                textDecoration: "none",
+                                boxShadow: "0 4px 12px rgba(99,102,241,0.35)",
+                                transition: "all 0.2s ease",
+                                cursor: "pointer"
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.transform = "translateY(-2px) scale(1.03)";
+                                  e.currentTarget.style.boxShadow = "0 6px 16px rgba(99,102,241,0.5)";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.transform = "translateY(0) scale(1)";
+                                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(99,102,241,0.35)";
+                                }}
+                                >
+                                  🚀 Enroll Now
+                                </a>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <ReactMarkdown
+                        components={{
+                          h3: ({node, ...props}) => (
+                            <div style={{
+                              background: "linear-gradient(135deg, #6366f1, #9333ea)",
+                              color: "#fff",
+                              padding: "6px 10px",
+                              borderRadius: "10px",
+                              fontWeight: "bold",
+                              fontSize: "13px",
+                              marginBottom: "8px"
+                            }} {...props} />
+                          ),
+
+                          img: ({node, ...props}) => (
+                            <img {...props} style={{ width: "100%", borderRadius: "10px" }} />
+                          ),
+
+                          code: ({node, inline, className, children}) => {
+                            if (className === "language-mermaid") {
+                              return <div className="mermaid">{children}</div>;
+                            }
+                            return <code>{children}</code>;
+                          }
+                        }}
+                      >
+                        {msg.text}
+                      </ReactMarkdown>
+                    )
+                  ) : (
+                    <span>{msg.text}</span>
+                  )}
+                </div>
+              );
+            })}
 
             {loading && <div className="bot-message">Typing...</div>}
             <div ref={messagesEndRef}></div>

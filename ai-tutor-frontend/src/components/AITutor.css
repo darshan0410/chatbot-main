@@ -69,7 +69,7 @@
 
 .bot-message {
   align-self: flex-start;
-  background: black;
+  background:#F4F6FB;
   padding: 10px 14px;
   border-radius: 18px 18px 18px 4px;
   max-width: 75%;
@@ -125,4 +125,8 @@
   background: linear-gradient(135deg, #6366f1, #9333ea);
   color: white;
   cursor: pointer;
+}
+.bot-message ul {
+  padding-left: 16px;
+  margin: 5px 0;
 }

@@ -1,8 +1,8 @@
 // src/controllers/chatController.js
 
-const axios = require("axios");
 const ChatMessage = require("../models/ChatMessage");
 const Course = require("../models/Course");
+const groqService = require("../services/groqService");
 
 class ChatController {
 
@@ -10,6 +10,7 @@ class ChatController {
     try {
       const { message, userId, sessionId } = req.body;
 
+      // ✅ Validation
       if (!message || !userId || !sessionId) {
         return res.status(400).json({
           success: false,
@@ -17,7 +18,7 @@ class ChatController {
         });
       }
 
-
+      // ✅ Save user message
       await ChatMessage.create({
         userId,
         sessionId,
@@ -25,6 +26,7 @@ class ChatController {
         content: message
       });
 
+      // ✅ Get last 10 messages
       const recentMessages = await ChatMessage.find({ userId, sessionId })
         .sort({ createdAt: -1 })
         .limit(10)
@@ -37,7 +39,7 @@ class ChatController {
           content: msg.content
         }));
 
-      // 3️⃣ Fetch Courses
+      // ✅ Fetch Courses
       const courses = await Course.find().lean();
 
       let formattedCourses = "No courses available.";
@@ -45,14 +47,15 @@ class ChatController {
       if (courses.length > 0) {
         formattedCourses = courses.map((course, index) => `
 ${index + 1}. ${course.title}
-   - Price: ₹${course.price}
-   - Author: ${course.author}
-   - Level: ${course.level}
-   - Description: ${course.description}
+- Price: ₹${course.price}
+- Author: ${course.author}
+- Level: ${course.level}
+- Description: ${course.description}
+- Link: http://localhost:3000/course/${course._id}
 `).join("\n");
       }
 
-      // 4️⃣ System Prompt
+      // ✅ System Prompt (AI Tutor + LMS)
       const systemPrompt = `
 You are an AI Tutor for an LMS website.
 
@@ -65,39 +68,33 @@ AVAILABLE COURSES:
 ${formattedCourses}
 `;
 
-      // 5️⃣ Call OpenRouter
-      const response = await axios.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-          model: "openai/gpt-4o-mini",
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...conversationHistory
-          ]
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-            "Content-Type": "application/json"
-          }
-        }
-      );
+      // ✅ Call Groq Service (IMPORTANT CHANGE)
+      const aiResponse = await groqService.chat([
+        { role: "system", content: systemPrompt },
+        ...conversationHistory
+      ]);
 
-      const aiMessage = response.data.choices[0].message.content;
+      if (!aiResponse.success) {
+        return res.status(500).json({
+          success: false,
+          error: aiResponse.error
+        });
+      }
 
-      // 6️⃣ Save AI response
+      const aiMessage = aiResponse.message;
+
+      // ✅ Save AI response
       await ChatMessage.create({
         userId,
         sessionId,
         role: "assistant",
         content: aiMessage,
         metadata: {
-          model: "meta-llama/llama-3-8b-instruct",
-          tokens: response.data.usage?.total_tokens
+          model: aiResponse.model
         }
       });
 
-      // 7️⃣ Send response
+      // ✅ Send response
       res.json({
         success: true,
         data: {
@@ -108,7 +105,8 @@ ${formattedCourses}
       });
 
     } catch (error) {
-      console.error("Chat Controller Error:", error.response?.data || error.message);
+      console.error("Chat Controller Error:", error.message);
+
       res.status(500).json({
         success: false,
         error: "AI response failed"
@@ -142,6 +140,7 @@ ${formattedCourses}
 
     } catch (error) {
       console.error("Get History Error:", error);
+
       res.status(500).json({
         success: false,
         error: "Failed to fetch chat history"
@@ -165,6 +164,7 @@ ${formattedCourses}
 
     } catch (error) {
       console.error("Delete Session Error:", error);
+
       res.status(500).json({
         success: false,
         error: "Failed to delete session"

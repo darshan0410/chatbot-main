@@ -24,8 +24,11 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
+const interviewRoutes = require('./src/routes/interviewRoutes');
+
 // Use chat routes
 app.use('/api/chat', chatRoutes);
+app.use('/api/interview', interviewRoutes);
 
 // Basic test route
 app.get('/api/health', (req, res) => {
